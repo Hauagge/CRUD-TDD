@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id              String         @id @default(uuid())
+    name            String?
+    email           String         @unique
+    password        String
+    avatar          String?
+    code_post       String?
+    country         String?
+    state           String?
+    city            String?
+    district        String?
+    street          String?
+    number          String?
+    complement      String?
+    document_type   String?
+    document_number String?
+    userType        String?
+    privice_police  Boolean        @default(false)
+    terms_user      Boolean        @default(false)
+    email_confirmed Boolean        @default(false)
+    isAdmin         Boolean        @default(false)
+    created_at      DateTime       @default(now())
+    updated_at      DateTime       @updatedAt
+    deleted_at      DateTime?
+    userEquipment   UserEquipment?
+
+
+    @@map("user")
+}
+
+model Equipment {
+    id               String         @id @default(uuid())
+    code             String         @unique
+    firmware_version String
+    hardware_version String
+    unusable         Boolean
+    activated_date   DateTime?
+    created_at       DateTime       @default(now())
+    updated_at       DateTime       @updatedAt
+    deleted_at       DateTime?
+    fk_id_plan       String?
+    plano            Plano?         @relation(fields: [fk_id_plan], references: [id])
+    userEquipment    UserEquipment?
+
+
+
+
+
+
+    @@map("equipment")
+}
+
+model Plano {
+    id          String      @id @default(uuid())
+    description String
+    permission  String[]
+    equipment   Equipment[]
+
+    @@map("plano")
+}
+
+model UserEquipment {
+    id              String    @id @default(uuid())
+    user            User      @relation(fields: [fk_id_user], references: [id])
+    fk_id_user      String    @unique
+    equipment       Equipment @relation(fields: [fk_id_equipment], references: [id])
+    fk_id_equipment String    @unique
+    fk_id_role      String    @unique
+    created_at      DateTime  @default(now())
+    updated_at      DateTime  @updatedAt
+    deleted_at      DateTime?
+    role            Role      @relation(fields: [fk_id_role], references: [id])
+
+
+    @@map("user_equipament")
+}
+
+model Role {
+    id            String         @id @default(uuid())
+    role_name     String
+    permission_id String
+    userEquipment UserEquipment?
+    created_at    DateTime       @default(now())
+    updated_at    DateTime       @updatedAt
+    deleted_at    DateTime?
+
+    RolePermissions RolePermissions[]
+    @@map("role")
+}
+
+model Permissions {
+    id          String    @id @default(uuid())
+    description String
+    created_at  DateTime  @default(now())
+    updated_at  DateTime  @updatedAt
+    deleted_at  DateTime?
+
+    rolePermissions RolePermissions[]
+    @@map("permission")
+}
+
+model RolePermissions {
+    id               String      @id @default(uuid())
+    fk_id_permission String      @unique
+    permissions      Permissions @relation(fields: [fk_id_permission], references: [id])
+    fk_id_role       String      @unique
+    role             Role        @relation(fields: [fk_id_role], references: [id])
+
+
+    @@map("role_permissions")
+}
